@@ -18,6 +18,7 @@ ventana_juego = pygame.display.set_mode(DIMENSIONES_VENTANA)
 
 imagen_fondo = pygame.image.load('Imagenes/Fondo.jpg')
 imagen_fondo_puntajes = pygame.image.load('Imagenes/Puntajes.jpg')
+
 icono = pygame.image.load('Imagenes/Icono.jpg')
 pygame.display.set_icon(icono)
 
@@ -27,7 +28,7 @@ pygame.display.set_icon(icono)
 
 fuente_titulo_grande = pygame.font.SysFont("Impact", 72)
 fuente_texto_boton = pygame.font.SysFont("Verdana", 25)
-fuente_subtitulo_pantalla = pygame.font.SysFont("Arial", 48, bold=True)
+fuente_subtitulo_pantalla = pygame.font.SysFont("Verdana", 48)
 
 # ============================================================================
 # FUNCIONES DE PANTALLAS
