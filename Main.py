@@ -25,8 +25,8 @@ pygame.display.set_icon(icono)
 # CONFIGURACION DE FUENTES
 # ============================================================================
 
-fuente_titulo_grande = pygame.font.SysFont("Arial", 72, bold=True)
-fuente_texto_boton = pygame.font.SysFont("Arial", 23, italic=True)
+fuente_titulo_grande = pygame.font.SysFont("Impact", 72)
+fuente_texto_boton = pygame.font.SysFont("Verdana", 25)
 fuente_subtitulo_pantalla = pygame.font.SysFont("Arial", 48, bold=True)
 
 # ============================================================================
@@ -67,7 +67,7 @@ def mostrar_pantalla_menu_principal(indice_boton_hover):
     ventana_juego.blit(imagen_fondo, (0, 0)) 
     dibujar_titulo_centrado("BUSCAMINAS", 100, "grande")
     
-    texto_dificultad = f"Dificultad: {nombres_dificultad[dificultad_actual]}"
+    texto_dificultad = f"{nombres_dificultad[dificultad_actual]}"
     
     botones = [
         (crear_boton_jugar(), "Jugar"),
