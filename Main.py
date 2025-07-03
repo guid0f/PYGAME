@@ -50,8 +50,21 @@ primer_click = True
 
 ######################### Funciones auxiliares ##############################
 
-def configurar_dificultad(dificultad):
-    
+def configurar_dificultad(dificultad: int) -> tuple:
+    """
+    Configura la dificultad del juego de Buscaminas.
+
+    Recibe:
+        dificultad (int): Un entero que representa el nivel de dificultad.
+                        0 para facil, 1 para intermedio, 2 para dificil.
+
+    Retorna:
+        tuple: Una tupla que contiene tres enteros:
+            - filas (int): Numero de filas del tablero.
+            - columnas (int): Numero de columnas del tablero.
+            - minas (int): Numero de minas en el tablero.
+            
+    """
     filas = columnas = minas = 0
 
     if dificultad == 0:
@@ -62,17 +75,33 @@ def configurar_dificultad(dificultad):
         filas, columnas, minas = 24, 24, 120  
 
     return (filas, columnas, minas)
- 
 
-def inicializar_tablero(dificultad_actual) -> dict: #PASAR A FUNCIONES
-    
+
+def inicializar_tablero(dificultad_actual: int) -> dict:
+    """
+    Inicializa el tablero del juego de Buscaminas.
+
+    Recibe:
+        dificultad_actual (int): El nivel de dificultad actual del juego.
+
+    Retorna:
+        dict: Un diccionario que contiene:
+            - matriz_minas (list): Matriz que indica la ubicacion de las minas.
+            - matriz_numeros (list): Matriz que indica los Numeros alrededor de las minas.
+            - matriz_estado (list): Matriz que indica el estado de cada celda (descubierta o no).
+            - matriz_banderas (list): Matriz que indica si hay una bandera en cada celda.
+            - minas_totales (int): Numero total de minas en el tablero.
+            - tiempo_inicio (int): Tiempo de inicio del juego.
+            - timer_activo (bool): Indica si el temporizador esta activo.
+            - filas (int): Numero de filas del tablero.
+            - columnas (int): Numero de columnas del tablero.
+    """
     filas, columnas, cantidad_minas = configurar_dificultad(dificultad_actual)
     
     matriz_minas = inicializar_matriz(filas, columnas, cantidad_minas)
     matriz_numeros = generar_matriz_numeros(matriz_minas)
     
     matriz_estado = []
-   
     for _ in range(filas):
         fila = []
         for _ in range(columnas):
@@ -80,7 +109,6 @@ def inicializar_tablero(dificultad_actual) -> dict: #PASAR A FUNCIONES
         matriz_estado.append(fila)
     
     matriz_banderas = []
-   
     for _ in range(filas):
         fila = []
         for _ in range(columnas):
@@ -100,11 +128,17 @@ def inicializar_tablero(dificultad_actual) -> dict: #PASAR A FUNCIONES
     }
 
 
+def mostrar_pantalla_menu_principal(indice: int, ventana) -> None:
+    """
+    Muestra la pantalla del menu principal del juego.
 
-estado_juego = inicializar_tablero(dificultad_actual)
-
-def mostrar_pantalla_menu_principal(indice, ventana): # pasar a funciones
-   
+    Recibe:
+        indice (int): El indice del boton actualmente seleccionado.
+        ventana: La ventana donde se dibuja el menu.
+    
+    Retorna:
+        None
+    """
     ventana.blit(imagen_fondo, (0, 0))
     dibujar_titulo_centrado("BUSCAMINAS", 100, "grande")
     texto_dificultad = NOMBRES_DIFICULTAD[dificultad_actual]
@@ -120,47 +154,51 @@ def mostrar_pantalla_menu_principal(indice, ventana): # pasar a funciones
         dibujar_boton_en_pantalla(botones[i][0], botones[i][1], indice == i)
 
 
-def mostrar_pantalla_juego(): #
-    """Función corregida para mostrar la pantalla de juego de forma responsive"""
+def mostrar_pantalla_juego() -> None:
+    """
+    Muestra la pantalla del juego de Buscaminas.
+
+    Retorna:
+        None
+    """
     ventana_juego.fill(COLOR_FONDO)
     
-    # Obtener dimensiones de la ventana (sin parámetros innecesarios)
     ancho_ventana = ventana_juego.get_width()
     alto_ventana = ventana_juego.get_height()
     
-    # Mostrar información del juego
     dibujar_titulo_centrado(f"Nivel {NOMBRES_DIFICULTAD[dificultad_actual]}", 50, "mediana")
     
-    # Mostrar el temporizador solo si está activo
     if estado_juego['timer_activo']:
         estado_juego['tiempo_transcurrido'] = (pygame.time.get_ticks() - estado_juego['tiempo_inicio']) // 1000
         texto_tiempo = fuente_texto_boton.render(f"Tiempo: {estado_juego['tiempo_transcurrido']}s", True, COLOR_TEXTO_NORMAL)
-        # CORREGIDO: tuple con int() aplicado a cada valor
         ventana_juego.blit(texto_tiempo, (int(ancho_ventana * 0.80), int(alto_ventana * 0.4)))
     
-    # Mostrar contadores
     texto_banderas = fuente_texto_boton.render(f"Banderas: {banderas_colocadas}", True, COLOR_TEXTO_NORMAL)
-    # CORREGIDO: int() aplicado a cada coordenada
     ventana_juego.blit(texto_banderas, (int(ancho_ventana * 0.80), int(alto_ventana * 0.45)))
     
     minas_restantes = estado_juego['minas_totales'] - banderas_colocadas
     texto_minas = fuente_texto_boton.render(f"Minas: {minas_restantes}", True, COLOR_TEXTO_NORMAL)
     ventana_juego.blit(texto_minas, (int(ancho_ventana * 0.80), int(alto_ventana * 0.5)))
     
-    # Dibujar el tablero
     dibujar_matriz_buscaminas(ventana_juego, estado_juego['matriz_numeros'], estado_juego['matriz_estado'], 
                                estado_juego['matriz_banderas'], fuente_texto_boton, imagen_bomba, imagen_bandera, 
                                mostrar_todas_bombas)
     
-    # Boton Volver
     dibujar_boton_en_pantalla(crear_boton('reiniciar', ventana_juego), "Reiniciar", indice_hover_actual == 1)
     dibujar_boton_en_pantalla(crear_boton('volver', ventana_juego), "Volver", indice_hover_actual == 0)
 
-def mostrar_pantalla_puntajes():
-   
+
+def mostrar_pantalla_puntajes() -> None:
+    """
+    Muestra la pantalla de puntajes del juego.
+
+    Retorna:
+        None
+    """
     ventana_juego.blit(imagen_fondo_puntajes, (0, 0))
     mostrar_lista_puntajes(ventana=ventana_juego, fuente=fuente_texto_boton)
     dibujar_boton_en_pantalla(crear_boton('volver', ventana_juego), "Volver", indice_hover_actual == 0)
+
 
 ########################### Loop principal ##############################
 
@@ -176,24 +214,24 @@ while juego_ejecutandose:
                 indice_hover_actual = detectar_hover_en_otras_pantallas(evento.pos, ventana_juego)
 
         elif evento.type == pygame.MOUSEBUTTONDOWN:
-            if evento.button == 1:  # Click izquierdo
+            if evento.button == 1: 
                 reproducir_sonido(sonidos, "click")
 
                 if pantalla_actual == "menu":
                     i = procesar_click_en_menu_nuevo(evento.pos, ventana_juego)
 
-                    if i == 0:  # Boton Jugar
+                    if i == 0:  
                         estado_juego = inicializar_tablero(dificultad_actual)
                         banderas_colocadas = 0
                         mostrar_todas_bombas = False
                         pantalla_actual = "juego"
                         juego_terminado = False
 
-                    elif i == 1:  # Cambiar dificultad
+                    elif i == 1:  
                         dificultad_actual = (dificultad_actual + 1) % 3
-                    elif i == 2:  # Puntajes
+                    elif i == 2:  
                         pantalla_actual = "puntajes"
-                    elif i == 3:  # Salir
+                    elif i == 3:  
                         juego_ejecutandose = False
 
                 elif pantalla_actual == "juego":
@@ -208,27 +246,32 @@ while juego_ejecutandose:
                         mostrar_todas_bombas = False
                         juego_terminado = False
                         primer_click = True
-                        # Opcionalmente reiniciar tiempo si ya se había activado antes:
                         estado_juego['tiempo_inicio'] = 0
                         estado_juego['timer_activo'] = False
                     else:                   
                         fila, col = calcular_posicion_matriz(evento.pos,ventana_juego,estado_juego['filas'],estado_juego['columnas'])
+                        if 0 <= fila < len(estado_juego['matriz_minas']):
+                            if 0 <= col < len(estado_juego['matriz_minas'][0]):                                                                          # CAMBIAR
+                                if not estado_juego['matriz_estado'][fila][col] and not estado_juego['matriz_banderas'][fila][col]:
+                                    if primer_click:
+                                        primer_click = False
+                                        if estado_juego['matriz_numeros'][fila][col] == 'X':
+                                            estado_juego['matriz_minas'], estado_juego['matriz_numeros'] = mover_bomba(estado_juego['matriz_minas'], fila, col)
+                                            for i in range(len(estado_juego['matriz_estado'])):
+                                                for j in range(len(estado_juego['matriz_estado'][0])):
+                                                    estado_juego['matriz_estado'][i][j] = False
+                                            for i in range(len(estado_juego['matriz_banderas'])):
+                                                for j in range(len(estado_juego['matriz_banderas'][0])):
+                                                    estado_juego['matriz_banderas'][i][j] = False
+                                    if not estado_juego['timer_activo']:
+                                        if estado_juego['matriz_numeros'][fila][col] != 'X':
+                                            estado_juego['tiempo_inicio'] = pygame.time.get_ticks()
+                                            estado_juego['timer_activo'] = True
 
-                        if 0 <= fila < len(estado_juego['matriz_minas']) and 0 <= col < len(estado_juego['matriz_minas'][0]):  # CAMBIAR
-                            if not estado_juego['matriz_estado'][fila][col] and not estado_juego['matriz_banderas'][fila][col]:
-                                if primer_click:
-                                    primer_click = False
-                                    if estado_juego['matriz_numeros'][fila][col] == 'X':
-                                        estado_juego['matriz_minas'], estado_juego['matriz_numeros'] = mover_bomba(estado_juego['matriz_minas'], fila, col)
-                                        estado_juego['matriz_estado'] = [[False] * len(estado_juego['matriz_estado'][0]) for _ in range(len(estado_juego['matriz_estado']))]                  # CAMBIAR     
-                                        estado_juego['matriz_banderas'] = [[False] * len(estado_juego['matriz_banderas'][0]) for _ in range(len(estado_juego['matriz_banderas']))]            # CAMBIAR
-                                if not estado_juego['timer_activo'] and estado_juego['matriz_numeros'][fila][col] != 'X':
-                                    estado_juego['tiempo_inicio'] = pygame.time.get_ticks()
-                                    estado_juego['timer_activo'] = True
                                 
                                 descubrir_celda(estado_juego['matriz_estado'], estado_juego['matriz_numeros'], fila, col)
                                 
-                                if estado_juego['matriz_numeros'][fila][col] == 'X':  # Mina descubierta
+                                if estado_juego['matriz_numeros'][fila][col] == 'X':  
                                     reproducir_sonido(sonidos, "derrota")
                                     mostrar_todas_bombas = True
                                     juego_terminado = True
@@ -252,15 +295,15 @@ while juego_ejecutandose:
                     if procesar_click_en_otras_pantallas(evento.pos, ventana_juego):
                         pantalla_actual = "menu"
 
-            elif evento.button == 3 and pantalla_actual == "juego":  # Click derecho (bandera)
+            elif evento.button == 3 and pantalla_actual == "juego":  
                 fila, col = calcular_posicion_matriz(evento.pos,ventana_juego,estado_juego['filas'],estado_juego['columnas'])
 
-                if 0 <= fila < len(estado_juego['matriz_banderas']) and 0 <= col < len(estado_juego['matriz_banderas'][0]) and not estado_juego['matriz_estado'][fila][col]: # CAMBIAR
+                if 0 <= fila < len(estado_juego['matriz_banderas']) and 0 <= col < len(estado_juego['matriz_banderas'][0]) and not estado_juego['matriz_estado'][fila][col]:    # CAMBIAR
                     estado_juego['matriz_banderas'][fila][col] = not estado_juego['matriz_banderas'][fila][col]
                     banderas_colocadas += 1 if estado_juego['matriz_banderas'][fila][col] else -1
                     reproducir_sonido(sonidos, "bandera")
 
-    # Manejo del juego terminado
+
     if juego_terminado and pantalla_actual == "juego":
         tiempo_transcurrido = (pygame.time.get_ticks() - estado_juego['tiempo_inicio']) // 1000
         nombre = pedir_nombre(ventana_juego, False)
@@ -273,7 +316,7 @@ while juego_ejecutandose:
         estado_juego['timer_activo'] = False
         pantalla_actual = "menu"
 
-    # Dibujar la pantalla actual
+
     if pantalla_actual == "menu":
         mostrar_pantalla_menu_principal(indice_hover_actual, ventana_juego)
     elif pantalla_actual == "puntajes":
