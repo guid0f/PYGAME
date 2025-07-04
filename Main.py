@@ -37,13 +37,9 @@ pantalla_actual = "menu"
 indice_hover_actual = -2
 puntaje = 0
 juego_terminado = False
-juego_ejecutandose = True
-                                    
-tiempo_inicio = 0
+juego_ejecutandose = True                              
 tiempo_transcurrido = 0
-timer_activo = False
 banderas_colocadas = 0
-
 minas_totales = 0
 mostrar_todas_bombas = False
 primer_click = True
