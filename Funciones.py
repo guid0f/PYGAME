@@ -10,7 +10,7 @@ def configurar_dificultad(dificultad: int) -> tuple:
 
     Recibe:
         dificultad (int): Un entero que representa el nivel de dificultad.
-                        0 para facil, 1 para intermedio, 2 para dificil.
+                        0 para facil, 1 para medio, 2 para dificil.
 
     Devuelve:
         tuple: Una tupla que contiene tres enteros:
