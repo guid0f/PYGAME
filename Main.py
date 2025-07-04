@@ -101,9 +101,8 @@ while juego_ejecutandose:
 
                         if not estado_juego['matriz_estado'][fila][col] and not estado_juego['matriz_banderas'][fila][col]:
 
-                            if primer_click:
-                                primer_click = False
-
+                            if primer_click == False:
+                                
                                 if estado_juego['matriz_numeros'][fila][col] == 'X':
                                     estado_juego['matriz_minas'], estado_juego['matriz_numeros'] = mover_bomba(estado_juego['matriz_minas'], fila, col)
                                     for i in range(len(estado_juego['matriz_estado'])):
