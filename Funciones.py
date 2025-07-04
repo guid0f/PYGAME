@@ -41,17 +41,28 @@ def inicializar_tablero(dificultad_actual: int) -> dict:
         dificultad_actual (int): El nivel de dificultad actual del juego.
 
     Devuelve:
-        dict: Un diccionario que contiene:
-            - matriz_minas (list): Matriz que indica la ubicacion de las minas.
-            - matriz_numeros (list): Matriz que indica los Numeros alrededor de las minas.
-            - matriz_estado (list): Matriz que indica el estado de cada celda (descubierta o no).
-            - matriz_banderas (list): Matriz que indica si hay una bandera en cada celda.
-            - minas_totales (int): Numero total de minas en el tablero.
-            - tiempo_inicio (int): Tiempo de inicio del juego.
-            - timer_activo (bool): Indica si el temporizador esta activo.
-            - filas (int): Numero de filas del tablero.
-            - columnas (int): Numero de columnas del tablero.
+        dict: Un diccionario que contiene las siguientes claves:
+            - matriz_minas (list[list[bool]]): Matriz de booleanos que indica la ubicación de las minas.
+                Cada celda contiene:
+                    - True si hay una mina.
+                    - False si no hay mina.
+            - matriz_numeros (list[list[int]]): Matriz de enteros que indica la cantidad de minas adyacentes a cada celda.
+                Cada celda contiene un número del 0 al 8.
+            - matriz_estado (list[list[bool]]): Matriz de booleanos que indica si una celda fue descubierta o no.
+                Cada celda contiene:
+                    - True si la celda esta descubierta.
+                    - False si esta oculta.
+            - matriz_banderas (list[list[bool]]): Matriz de booleanos que indica si una celda tiene una bandera colocada por el jugador.
+                Cada celda contiene:
+                    - True si hay una bandera.
+                    - False si no la hay.
+            - minas_totales (int): Numero total de minas generadas en el tablero.
+            - tiempo_inicio (int): Valor inicial del temporizador del juego (0 al comenzar).
+            - timer_activo (bool): Indica si el temporizador esta actualmente en funcionamiento.
+            - filas (int): Cantidad de filas del tablero.
+            - columnas (int): Cantidad de columnas del tablero.
     """
+
     filas, columnas, cantidad_minas = configurar_dificultad(dificultad_actual)
     
     matriz_minas = inicializar_matriz(filas, columnas, cantidad_minas)
@@ -957,18 +968,29 @@ def mostrar_lista_puntajes(ventana: pygame.Surface, fuente: pygame.font.Font) ->
         y = cuadro_y + 80  
         posicion = 1  
 
-        for nombre, puntaje, tiempo in puntajes:
+        for puntaje_data in puntajes:
+            nombre = puntaje_data[0]
+            puntaje = puntaje_data[1]
+            tiempo = puntaje_data[2]
+
             rect_puntaje = pygame.Rect(cuadro_x + 10, y, ancho_cuadro - 20, 35)
-            pygame.draw.rect(ventana, (255, 255, 255), rect_puntaje) 
-            pygame.draw.rect(ventana, (0, 0, 0), rect_puntaje, 1)  
+            pygame.draw.rect(ventana, (255, 255, 255), rect_puntaje)
+            pygame.draw.rect(ventana, (0, 0, 0), rect_puntaje, 1)
+
+            en_podio = posicion <= 3
             
-            color_texto_linea = colores_podio[posicion - 1] if posicion <= 3 else (0, 0, 0)
+            if en_podio:
+                color_texto_linea = colores_podio[posicion - 1]
+            else:
+                    color_texto_linea = (0, 0, 0)
+
+
             linea = f"{posicion}. {nombre[:12]} - Pts: {puntaje} - Tiempo: {tiempo}s"
             texto = fuente.render(linea, True, color_texto_linea)
+            ventana.blit(texto, (cuadro_x + 20, y + 5))
 
-            ventana.blit(texto, (cuadro_x + 20, y + 5)) 
-            y += 40  
-            posicion += 1 
+            y += 40
+            posicion += 1
 
     if mensaje:
         x_msg = cuadro_x + (ancho_cuadro - mensaje.get_width()) // 2

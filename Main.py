@@ -96,12 +96,15 @@ while juego_ejecutandose:
                     else:
                         fila, col = calcular_posicion_matriz(evento.pos, ventana_juego, estado_juego['filas'], estado_juego['columnas'])                        
                        
-                        if fila < 0 or fila >= len(estado_juego['matriz_minas']) or col < 0 or col >= len(estado_juego['matriz_minas'][0]):
-                            continue 
+                        fuera_de_filas = fila < 0 or fila >= len(estado_juego['matriz_minas'])
+                        fuera_de_columnas = col < 0 or col >= len(estado_juego['matriz_minas'][0])
+
+                        if fuera_de_filas or fuera_de_columnas:
+                            continue
 
                         if not estado_juego['matriz_estado'][fila][col] and not estado_juego['matriz_banderas'][fila][col]:
 
-                            if primer_click == False:
+                            if primer_click:
                                 
                                 if estado_juego['matriz_numeros'][fila][col] == 'X':
                                     estado_juego['matriz_minas'], estado_juego['matriz_numeros'] = mover_bomba(estado_juego['matriz_minas'], fila, col)
@@ -113,6 +116,8 @@ while juego_ejecutandose:
                                     for i in range(len(estado_juego['matriz_banderas'])):
                                         for j in range(len(estado_juego['matriz_banderas'][0])):
                                             estado_juego['matriz_banderas'][i][j] = False
+                                            
+                                primer_click = False
 
                             if not estado_juego['timer_activo'] and estado_juego['matriz_numeros'][fila][col] != 'X':
                                 estado_juego['tiempo_inicio'] = pygame.time.get_ticks()
@@ -128,7 +133,7 @@ while juego_ejecutandose:
                                 mostrar_pantalla_juego(dificultad_actual, estado_juego, banderas_colocadas, fuente_texto_boton, imagen_bomba, imagen_bandera,  
                                                         mostrar_todas_bombas, indice_hover_actual, ventana_juego)
                                 pygame.display.flip()
-                                pygame.time.wait(1500)
+                                pygame.time.wait(2000)
                                 tiempo_transcurrido = (pygame.time.get_ticks() - estado_juego['tiempo_inicio']) // 1000
                                 nombre = pedir_nombre(ventana_juego, False)
                                 
@@ -148,11 +153,16 @@ while juego_ejecutandose:
 
             elif evento.button == 3 and pantalla_actual == "juego":  
                 fila, col = calcular_posicion_matriz(evento.pos,ventana_juego,estado_juego['filas'],estado_juego['columnas'])               
-               
-                if fila < 0 or fila >= len(estado_juego['matriz_banderas']) or col < 0 or col >= len(estado_juego['matriz_banderas'][0]) or estado_juego['matriz_estado'][fila][col]:
-                    continue 
+                              
+                fuera_de_filas = fila < 0 or fila >= len(estado_juego['matriz_banderas'])
+                fuera_de_columnas = col < 0 or col >= len(estado_juego['matriz_banderas'][0])
+                casilla_ya_descubierta = estado_juego['matriz_estado'][fila][col]
+
+                if fuera_de_filas or fuera_de_columnas or casilla_ya_descubierta:
+                    continue
 
                 estado_juego['matriz_banderas'][fila][col] = not estado_juego['matriz_banderas'][fila][col]
+               
                 if estado_juego['matriz_banderas'][fila][col]:
                     banderas_colocadas += 1
                 else:
