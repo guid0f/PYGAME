@@ -30,16 +30,16 @@ fuente_titulo_grande = pygame.font.SysFont("Impact", 72)
 fuente_texto_boton = pygame.font.SysFont("Verdana", 25)
 fuente_subtitulo_pantalla = pygame.font.SysFont("Verdana", 48)
 
-############################## Banderas y Contadores ################################ 
+############################## Contadores y Banderas ################################ 
 
-dificultad_actual = 0
 pantalla_actual = "menu"
+dificultad_actual = 0
 indice_hover_actual = -2
 puntaje = 0
-juego_terminado = False
-juego_ejecutandose = True                              
 tiempo_transcurrido = 0
 banderas_colocadas = 0
+juego_terminado = False
+juego_ejecutandose = True                              
 mostrar_todas_bombas = False
 primer_click = True
 
@@ -173,7 +173,8 @@ while juego_ejecutandose:
     if juego_terminado and pantalla_actual == "juego":
         tiempo_transcurrido = (pygame.time.get_ticks() - estado_juego['tiempo_inicio']) // 1000
         es_victoria = verificar_victoria(estado_juego['matriz_estado'], estado_juego['matriz_minas'])
-        mostrar_pantalla_juego(dificultad_actual, estado_juego, banderas_colocadas, fuente_texto_boton, imagen_bomba, imagen_bandera, mostrar_todas_bombas, indice_hover_actual, ventana_juego)
+        mostrar_pantalla_juego(dificultad_actual, estado_juego, banderas_colocadas, fuente_texto_boton, imagen_bomba, imagen_bandera,  
+                               mostrar_todas_bombas, indice_hover_actual, ventana_juego)
         nombre = pedir_nombre(ventana_juego, es_victoria)
 
         if nombre:
