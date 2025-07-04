@@ -42,7 +42,7 @@ def inicializar_tablero(dificultad_actual: int) -> dict:
 
     Devuelve:
         dict: Un diccionario que contiene las siguientes claves:
-            - matriz_minas: Matriz de booleanos que indica la ubicación de las minas.
+            - matriz_minas: Matriz de booleanos que indica la ubicacion de las minas.
                 Cada celda contiene:
                     - True si hay una mina.
                     - False si no hay mina.
@@ -50,15 +50,15 @@ def inicializar_tablero(dificultad_actual: int) -> dict:
                 Cada celda contiene un número del 0 al 8.
             - matriz_estado: Matriz de booleanos que indica si una celda fue descubierta o no.
                 Cada celda contiene:
-                    - True si la celda está descubierta.
-                    - False si está oculta.
+                    - True si la celda esta descubierta.
+                    - False si esta oculta.
             - matriz_banderas: Matriz de booleanos que indica si una celda tiene una bandera colocada por el jugador.
                 Cada celda contiene:
                     - True si hay una bandera.
                     - False si no la hay.
-            - minas_totales (int): Número total de minas generadas en el tablero.
+            - minas_totales (int): Numero total de minas generadas en el tablero.
             - tiempo_inicio (int): Valor inicial del temporizador del juego (0 al comenzar).
-            - timer_activo (bool): Indica si el temporizador está actualmente en funcionamiento.
+            - timer_activo (bool): Indica si el temporizador esta actualmente en funcionamiento.
             - filas (int): Cantidad de filas del tablero.
             - columnas (int): Cantidad de columnas del tablero.
     """
@@ -99,16 +99,16 @@ def inicializar_tablero(dificultad_actual: int) -> dict:
 
 def mostrar_pantalla_menu_principal(indice: int, ventana, imagen_fondo, dificultad_actual: int) -> None:
     """
-    Muestra la pantalla del menú principal del juego Buscaminas.
+    Muestra la pantalla del menu principal del juego Buscaminas.
 
-    Dibuja el fondo, el título del juego y los botones principales del menú.
-    Resalta el botón actualmente seleccionado según el índice proporcionado.
+    Dibuja el fondo, el titulo del juego y los botones principales del menu.
+    Resalta el boton actualmente seleccionado segun el indice proporcionado.
 
     Recibe:
-        indice (int): Índice del botón actualmente seleccionado (0-3).
-        ventana (pygame.Surface): Superficie donde se dibuja el menú.
-        imagen_fondo (pygame.Surface): Imagen de fondo del menú principal.
-        dificultad_actual (int): Índice de la dificultad actual del juego.
+        indice (int): Indice del boton actualmente seleccionado (0-3).
+        ventana (pygame.Surface): Superficie donde se dibuja el menu.
+        imagen_fondo (pygame.Surface): Imagen de fondo del menu principal.
+        dificultad_actual (int): Indice de la dificultad actual del juego.
 
     Retorna:
         None
@@ -457,7 +457,7 @@ def dibujar_titulo_centrado(texto: str, y: int, tipo_fuente: str) -> None:
     Dibuja un titulo centrado horizontalmente en la pantalla.
     
     Recibe:
-        texto (str): Texto del título a mostrar.
+        texto (str): Texto del titulo a mostrar.
         y (int): Posicion vertical base donde dibujar el titulo.
         tipo_fuente (str): Tipo de fuente a usar:
             - "grande": Fuente Impact grande (6% del ancho de ventana)
