@@ -1,8 +1,199 @@
 import os
 import pygame
 import random
-from typing import List, Tuple, Dict, Optional, Any
 from Constantes import *
+
+
+def configurar_dificultad(dificultad: int) -> tuple:
+    """
+    Configura la dificultad del juego de Buscaminas.
+
+    Recibe:
+        dificultad (int): Un entero que representa el nivel de dificultad.
+                        0 para facil, 1 para intermedio, 2 para dificil.
+
+    Devuelve:
+        tuple: Una tupla que contiene tres enteros:
+            - filas (int): Numero de filas del tablero.
+            - columnas (int): Numero de columnas del tablero.
+            - minas (int): Numero de minas en el tablero.
+            
+    """
+    filas = 0
+    columnas = 0
+    minas = 0
+
+    if dificultad == 0:
+        filas, columnas, minas = (8, 8, 10)       
+    elif dificultad == 1:
+        filas, columnas, minas = (16, 16, 50)  
+    else:
+        filas, columnas, minas = (24, 24, 120)  
+
+    return (filas, columnas, minas)
+
+
+def inicializar_tablero(dificultad_actual: int) -> dict:
+    """
+    Inicializa el tablero del juego de Buscaminas.
+
+    Recibe:
+        dificultad_actual (int): El nivel de dificultad actual del juego.
+
+    Devuelve:
+        dict: Un diccionario que contiene:
+            - matriz_minas (list): Matriz que indica la ubicacion de las minas.
+            - matriz_numeros (list): Matriz que indica los Numeros alrededor de las minas.
+            - matriz_estado (list): Matriz que indica el estado de cada celda (descubierta o no).
+            - matriz_banderas (list): Matriz que indica si hay una bandera en cada celda.
+            - minas_totales (int): Numero total de minas en el tablero.
+            - tiempo_inicio (int): Tiempo de inicio del juego.
+            - timer_activo (bool): Indica si el temporizador esta activo.
+            - filas (int): Numero de filas del tablero.
+            - columnas (int): Numero de columnas del tablero.
+    """
+    filas, columnas, cantidad_minas = configurar_dificultad(dificultad_actual)
+    
+    matriz_minas = inicializar_matriz(filas, columnas, cantidad_minas)
+    matriz_numeros = generar_matriz_numeros(matriz_minas)
+    
+    matriz_estado = []
+    
+    for _ in range(filas):
+        fila = []
+        for _ in range(columnas):
+            fila.append(False)
+        matriz_estado.append(fila)
+    
+    matriz_banderas = []
+    
+    for _ in range(filas):
+        fila = []
+        for _ in range(columnas):
+            fila.append(False)
+        matriz_banderas.append(fila)
+    
+    return {
+        'matriz_minas': matriz_minas,
+        'matriz_numeros': matriz_numeros,
+        'matriz_estado': matriz_estado,
+        'matriz_banderas': matriz_banderas,
+        'minas_totales': cantidad_minas,
+        'tiempo_inicio': 0,
+        'timer_activo': False,
+        'filas': filas,
+        'columnas': columnas
+    }
+
+
+def mostrar_pantalla_menu_principal(indice: int, ventana, imagen_fondo, dificultad_actual: int) -> None:
+    """
+    Muestra la pantalla del menu principal del juego Buscaminas, dibuja el fondo, titulo del juego, y los botones principales del menu.
+    Resalta el boton actualmente seleccionado segun el indice proporcionado.
+    
+    Recibe:
+        indice (int): El indice del boton actualmente seleccionado (0-3).
+        ventana (pygame.Surface): La ventana/superficie donde se dibuja el menu.
+        imagen_fondo (pygame.Surface): La imagen de fondo del menu principal.
+        dificultad_actual (int): El indice de la dificultad actual del juego.
+    
+    Devuelve:
+        None
+    """
+    ventana.blit(imagen_fondo, (0, 0))
+    dibujar_titulo_centrado("BUSCAMINAS", 100, "grande")
+    texto_dificultad = NOMBRES_DIFICULTAD[dificultad_actual]
+    
+    botones = [
+        (crear_boton('jugar', ventana), "Jugar"),
+        (crear_boton('dificultad', ventana), texto_dificultad),
+        (crear_boton('puntajes', ventana), "Puntajes"),
+        (crear_boton('salir', ventana), "Salir"),
+    ]
+    
+    for i in range(len(botones)):
+        dibujar_boton_en_pantalla(botones[i][0], botones[i][1], indice == i)
+
+
+def mostrar_pantalla_juego(dificultad_actual: int, estado_juego: dict, banderas_colocadas: int, 
+                          fuente_texto_boton: pygame.font.Font, imagen_bomba: pygame.Surface, 
+                          imagen_bandera: pygame.Surface, mostrar_todas_bombas: bool, 
+                          indice_hover_actual: int, ventana_juego: pygame.Surface) -> None:
+    """
+    Muestra la pantalla principal del juego de Buscaminas en curso.
+    
+    Dibuja el tablero del juego, informacion del estado actual (tiempo, banderas, minas),
+    y los botones de control. Actualiza el cronometro si el juego esta activo.
+    
+    Recibe:
+        dificultad_actual (int): El indice de la dificultad actual del juego.
+        estado_juego (dict): Diccionario con el estado del juego que contiene:
+            - 'timer_activo' (bool): Si el cronometro esta funcionando
+            - 'tiempo_transcurrido' (int): Tiempo transcurrido en segundos
+            - 'tiempo_inicio' (int): Timestamp del inicio del juego
+            - 'minas_totales' (int): Numero total de minas en el tablero
+            - 'matriz_numeros' (list): Matriz con los numeros del buscaminas
+            - 'matriz_estado' (list): Matriz con el estado de cada casilla
+            - 'matriz_banderas' (list): Matriz con las banderas colocadas
+        banderas_colocadas (int): Numero de banderas que el jugador ha colocado.
+        fuente_texto_boton (pygame.font.Font): Fuente para renderizar el texto.
+        imagen_bomba (pygame.Surface): Imagen que representa una bomba.
+        imagen_bandera (pygame.Surface): Imagen que representa una bandera.
+        mostrar_todas_bombas (bool): Si se deben mostrar todas las bombas (fin del juego).
+        indice_hover_actual (int): Indice del botón actualmente resaltado.
+        ventana_juego (pygame.Surface): La ventana/superficie donde se dibuja el juego.
+    
+    Devuelve:
+        None
+    """
+    ventana_juego.fill(COLOR_FONDO)
+    
+    ancho_ventana = ventana_juego.get_width()
+    alto_ventana = ventana_juego.get_height()
+    
+    dibujar_titulo_centrado(f"Nivel {NOMBRES_DIFICULTAD[dificultad_actual]}", 50, "mediana")
+    
+    if estado_juego['timer_activo']:
+        estado_juego['tiempo_transcurrido'] = (pygame.time.get_ticks() - estado_juego['tiempo_inicio']) // 1000
+        texto_tiempo = fuente_texto_boton.render(f"Tiempo: {estado_juego['tiempo_transcurrido']}s", True, COLOR_TEXTO_NORMAL)
+        ventana_juego.blit(texto_tiempo, (int(ancho_ventana * 0.80), int(alto_ventana * 0.4)))
+    
+    texto_banderas = fuente_texto_boton.render(f"Banderas: {banderas_colocadas}", True, COLOR_TEXTO_NORMAL)
+    ventana_juego.blit(texto_banderas, (int(ancho_ventana * 0.80), int(alto_ventana * 0.45)))
+    
+    minas_restantes = estado_juego['minas_totales'] - banderas_colocadas
+    texto_minas = fuente_texto_boton.render(f"Minas: {minas_restantes}", True, COLOR_TEXTO_NORMAL)
+    ventana_juego.blit(texto_minas, (int(ancho_ventana * 0.80), int(alto_ventana * 0.5)))
+    
+    dibujar_matriz_buscaminas(ventana_juego, estado_juego['matriz_numeros'], estado_juego['matriz_estado'],
+                             estado_juego['matriz_banderas'], fuente_texto_boton, imagen_bomba, imagen_bandera,
+                             mostrar_todas_bombas)
+    
+    dibujar_boton_en_pantalla(crear_boton('reiniciar', ventana_juego), "Reiniciar", indice_hover_actual == 1)
+    dibujar_boton_en_pantalla(crear_boton('volver', ventana_juego), "Volver", indice_hover_actual == 0)
+
+
+def mostrar_pantalla_puntajes(ventana_juego: pygame.Surface, imagen_fondo_puntajes: pygame.Surface, 
+                             fuente_texto_boton: pygame.font.Font, indice_hover_actual: int) -> None:
+    """
+    Muestra la pantalla de puntajes del juego.
+    
+    Dibuja el fondo de puntajes, la lista de mejores puntajes y el boton para volver
+    al menu principal.
+    
+    Recibe:
+        ventana_juego (pygame.Surface): La ventana/superficie donde se dibuja la pantalla.
+        imagen_fondo_puntajes (pygame.Surface): La imagen de fondo para la pantalla de puntajes.
+        fuente_texto_boton (pygame.font.Font): Fuente para renderizar el texto de los botones.
+        indice_hover_actual (int): Indice del boton actualmente resaltado.
+    
+    Devuelve:
+        None
+    """
+    ventana_juego.blit(imagen_fondo_puntajes, (0, 0))
+    mostrar_lista_puntajes(ventana=ventana_juego, fuente=fuente_texto_boton)
+    dibujar_boton_en_pantalla(crear_boton('volver', ventana_juego), "Volver", indice_hover_actual == 0)
+
 
 # ===============================================================================
 # CREACION DE BOTONES
@@ -20,7 +211,7 @@ def crear_boton(tipo_de_valor: str, ventana: pygame.Surface) -> pygame.Rect:
             - 'puntajes': Boton para ver puntajes
             - 'salir': Boton para salir del juego
             - 'reiniciar': Boton para reiniciar partida
-            - 'volver': Boton para volver al menú anterior
+            - 'volver': Boton para volver al menu anterior
         ventana (pygame.Surface): Superficie de la ventana donde se dibujara el boton.
         
     Devuelve:
@@ -51,7 +242,7 @@ def crear_boton(tipo_de_valor: str, ventana: pygame.Surface) -> pygame.Rect:
 # DETECCION DE CLICKS Y HOVER
 # ===============================================================================
 
-def calcular_posicion_matriz(pos: Tuple[int, int], superficie: pygame.Surface, filas: int, columnas: int) -> Tuple[int, int]:
+def calcular_posicion_matriz(pos: tuple[int, int], superficie: pygame.Surface, filas: int, columnas: int) -> tuple[int, int]:
     """
     Convierte coordenadas de mouse en posicion de matriz del tablero de buscaminas.
     
@@ -99,7 +290,7 @@ def calcular_posicion_matriz(pos: Tuple[int, int], superficie: pygame.Surface, f
     return resultado
 
 
-def procesar_click_en_menu_nuevo(posicion: Tuple[int, int], ventana: pygame.Surface) -> int:
+def procesar_click_en_menu_nuevo(posicion: tuple[int, int], ventana: pygame.Surface) -> int:
     """
     Detecta en que boton del menu principal se hizo click.
     
@@ -133,7 +324,7 @@ def procesar_click_en_menu_nuevo(posicion: Tuple[int, int], ventana: pygame.Surf
     return indice
 
 
-def detectar_hover_en_menu_nuevo(posicion: Tuple[int, int], ventana: pygame.Surface) -> int:
+def detectar_hover_en_menu_nuevo(posicion: tuple[int, int], ventana: pygame.Surface) -> int:
     """
     Detecta sobre que boton del menu principal esta el cursor del mouse.
     
@@ -151,6 +342,7 @@ def detectar_hover_en_menu_nuevo(posicion: Tuple[int, int], ventana: pygame.Surf
             
     """
     tipos_de_valor = ['jugar', 'dificultad', 'puntajes', 'salir']
+   
     botones = []
     
     for tipo in tipos_de_valor:
@@ -167,7 +359,7 @@ def detectar_hover_en_menu_nuevo(posicion: Tuple[int, int], ventana: pygame.Surf
     return indice
 
 
-def procesar_click_en_otras_pantallas(posicion: Tuple[int, int], ventana: pygame.Surface) -> Tuple[bool, bool]:
+def procesar_click_en_otras_pantallas(posicion: tuple[int, int], ventana: pygame.Surface) -> tuple[bool, bool]:
     """
     Detecta clicks en los botones de reiniciar y volver en pantallas secundarias.
     
@@ -177,17 +369,18 @@ def procesar_click_en_otras_pantallas(posicion: Tuple[int, int], ventana: pygame
         
     Devuelve:
         Tuple[bool, bool]: Tupla con dos valores booleanos:
-            - Primer valor: True si se clickeó "Reiniciar", False si no
-            - Segundo valor: True si se clickeó "Volver", False si no
+            - Primer valor: True si se clickeo "Reiniciar", False si no
+            - Segundo valor: True si se clickeo "Volver", False si no
             
     """
+   
     boton_volver = crear_boton('volver', ventana)
     boton_reiniciar = crear_boton('reiniciar', ventana)
 
     return (boton_reiniciar.collidepoint(posicion), boton_volver.collidepoint(posicion))
 
 
-def detectar_hover_en_otras_pantallas(posicion: Tuple[int, int], ventana: pygame.Surface) -> int:
+def detectar_hover_en_otras_pantallas(posicion: tuple[int, int], ventana: pygame.Surface) -> int:
     """
     Detecta sobre que boton esta el cursor en pantallas secundarias.
     
@@ -206,6 +399,7 @@ def detectar_hover_en_otras_pantallas(posicion: Tuple[int, int], ventana: pygame
     boton_volver = crear_boton('volver', ventana)
     
     indice = -2
+   
     if boton_volver.collidepoint(posicion):
         indice = 0
     if boton_reiniciar.collidepoint(posicion):
@@ -287,7 +481,7 @@ def dibujar_titulo_centrado(texto: str, y: int, tipo_fuente: str) -> None:
 # MATRIZ BUSCAMINAS
 # ===============================================================================
 
-def inicializar_matriz(filas: int, columnas: int, minas: int) -> List[List[str]]:
+def inicializar_matriz(filas: int, columnas: int, minas: int) -> list[list[str]]:
     """
     Crea una matriz del buscaminas con minas distribuidas aleatoriamente.
     
@@ -318,7 +512,7 @@ def inicializar_matriz(filas: int, columnas: int, minas: int) -> List[List[str]]
     return matriz
 
 
-def generar_matriz_numeros(matriz: List[List[str]]) -> List[List[Any]]:
+def generar_matriz_numeros(matriz: list[list[str]]) -> list[list[any]]:
     """
     Genera una matriz con numeros que indican cuantas minas hay alrededor de cada casilla.
     
@@ -328,7 +522,7 @@ def generar_matriz_numeros(matriz: List[List[str]]) -> List[List[Any]]:
     Devuelve:
         List[List[Any]]: Matriz donde cada casilla contiene:
             - 'X' si hay una mina
-            - int (0-8) indicando el número de minas adyacentes
+            - int (0-8) indicando el numero de minas adyacentes
             
     """
     filas, columnas = len(matriz), len(matriz[0])
@@ -359,8 +553,8 @@ def generar_matriz_numeros(matriz: List[List[str]]) -> List[List[Any]]:
     return numeros
 
 
-def dibujar_matriz_buscaminas(superficie: pygame.Surface, numeros: List[List[Any]], 
-                            estado: List[List[bool]], banderas: List[List[bool]], 
+def dibujar_matriz_buscaminas(superficie: pygame.Surface, numeros: list[list[any]], 
+                            estado: list[list[bool]], banderas: list[list[bool]], 
                             fuente: pygame.font.Font, imagen_bomba: pygame.Surface, 
                             imagen_bandera: pygame.Surface, mostrar_todas_bombas: bool = False) -> None:
     """
@@ -454,7 +648,7 @@ def dibujar_matriz_buscaminas(superficie: pygame.Surface, numeros: List[List[Any
 
 
 
-def descubrir_celda(matriz_estado: List[List[bool]], matriz_numeros: List[List[Any]], 
+def descubrir_celda(matriz_estado: list[list[bool]], matriz_numeros: list[list[any]], 
                    fila: int, columna: int) -> None:
     """
     Descubre una celda y recursivamente descubre celdas vacias adyacentes.
@@ -488,7 +682,7 @@ def descubrir_celda(matriz_estado: List[List[bool]], matriz_numeros: List[List[A
                 descubrir_celda(matriz_estado, matriz_numeros, ni, nj)
 
 
-def verificar_victoria(matriz_estado: List[List[bool]], matriz_minas: List[List[str]]) -> bool:
+def verificar_victoria(matriz_estado: list[list[bool]], matriz_minas: list[list[str]]) -> bool:
     """
     Verifica si el jugador ha ganado el juego.
     
@@ -511,7 +705,7 @@ def verificar_victoria(matriz_estado: List[List[bool]], matriz_minas: List[List[
     return victoria
 
 
-def pedir_nombre(ventana: pygame.Surface, victoria: bool) -> Optional[str]:
+def pedir_nombre(ventana: pygame.Surface, victoria: bool) -> str:
     """
     Solicita al jugador que ingrese su nombre al finalizar el juego.
     
@@ -583,12 +777,13 @@ def pedir_nombre(ventana: pygame.Surface, victoria: bool) -> Optional[str]:
             pygame.draw.rect(ventana, color, input_rect, 2)
             texto_nombre = font.render(nombre, True, (0, 0, 0))
             ventana.blit(texto_nombre, (input_rect.x + 5, input_rect.y + 5))
-
+            
             pygame.display.flip()
+         
             
     return nombre
 
-def mover_bomba(matriz_minas: List[List[str]], fila_bomba: int, col_bomba: int) -> Tuple[List[List[str]], List[List[Any]]]:
+def mover_bomba(matriz_minas: list[list[str]], fila_bomba: int, col_bomba: int) -> tuple[list[list[str]], list[list[any]]]:
     """
     Mueve una mina de su posicion actual a una nueva posicion aleatoria.
     
@@ -702,7 +897,7 @@ def guardar_puntaje(nombre: str, puntaje: int, tiempo: int) -> None:
             archivo.write(f"{nombre},{puntaje},{tiempo}\n")
 
 
-def leer_puntajes() -> List[Tuple[str, int, int]]:
+def leer_puntajes() -> list[tuple[str, int, int]]:
     """
     Lee los puntajes desde el archivo CSV.
     
@@ -805,7 +1000,7 @@ def inicializar_musica() -> None:
     pygame.mixer.music.set_volume(0.2)
 
 
-def cargar_sonidos() -> Dict[str, pygame.mixer.Sound]:
+def cargar_sonidos() -> dict[str, pygame.mixer.Sound]:
     """
     Carga todos los efectos de sonido del juego.
     
@@ -830,7 +1025,7 @@ def cargar_sonidos() -> Dict[str, pygame.mixer.Sound]:
     return sonidos
 
 
-def reproducir_sonido(sonidos: Dict[str, pygame.mixer.Sound], tipo: str) -> None:
+def reproducir_sonido(sonidos: dict[str, pygame.mixer.Sound], tipo: str) -> None:
     """
     Reproduce un sonido especifico si existe en el diccionario.
     
