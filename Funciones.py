@@ -42,23 +42,23 @@ def inicializar_tablero(dificultad_actual: int) -> dict:
 
     Devuelve:
         dict: Un diccionario que contiene las siguientes claves:
-            - matriz_minas (list[list[bool]]): Matriz de booleanos que indica la ubicación de las minas.
+            - matriz_minas: Matriz de booleanos que indica la ubicación de las minas.
                 Cada celda contiene:
                     - True si hay una mina.
                     - False si no hay mina.
-            - matriz_numeros (list[list[int]]): Matriz de enteros que indica la cantidad de minas adyacentes a cada celda.
+            - matriz_numeros: Matriz de enteros que indica la cantidad de minas adyacentes a cada celda.
                 Cada celda contiene un número del 0 al 8.
-            - matriz_estado (list[list[bool]]): Matriz de booleanos que indica si una celda fue descubierta o no.
+            - matriz_estado: Matriz de booleanos que indica si una celda fue descubierta o no.
                 Cada celda contiene:
-                    - True si la celda esta descubierta.
-                    - False si esta oculta.
-            - matriz_banderas (list[list[bool]]): Matriz de booleanos que indica si una celda tiene una bandera colocada por el jugador.
+                    - True si la celda está descubierta.
+                    - False si está oculta.
+            - matriz_banderas: Matriz de booleanos que indica si una celda tiene una bandera colocada por el jugador.
                 Cada celda contiene:
                     - True si hay una bandera.
                     - False si no la hay.
-            - minas_totales (int): Numero total de minas generadas en el tablero.
+            - minas_totales (int): Número total de minas generadas en el tablero.
             - tiempo_inicio (int): Valor inicial del temporizador del juego (0 al comenzar).
-            - timer_activo (bool): Indica si el temporizador esta actualmente en funcionamiento.
+            - timer_activo (bool): Indica si el temporizador está actualmente en funcionamiento.
             - filas (int): Cantidad de filas del tablero.
             - columnas (int): Cantidad de columnas del tablero.
     """
@@ -99,16 +99,18 @@ def inicializar_tablero(dificultad_actual: int) -> dict:
 
 def mostrar_pantalla_menu_principal(indice: int, ventana, imagen_fondo, dificultad_actual: int) -> None:
     """
-    Muestra la pantalla del menu principal del juego Buscaminas, dibuja el fondo, titulo del juego, y los botones principales del menu.
-    Resalta el boton actualmente seleccionado segun el indice proporcionado.
-    
+    Muestra la pantalla del menú principal del juego Buscaminas.
+
+    Dibuja el fondo, el título del juego y los botones principales del menú.
+    Resalta el botón actualmente seleccionado según el índice proporcionado.
+
     Recibe:
-        indice (int): El indice del boton actualmente seleccionado (0-3).
-        ventana (pygame.Surface): La ventana/superficie donde se dibuja el menu.
-        imagen_fondo (pygame.Surface): La imagen de fondo del menu principal.
-        dificultad_actual (int): El indice de la dificultad actual del juego.
-    
-    Devuelve:
+        indice (int): Índice del botón actualmente seleccionado (0-3).
+        ventana (pygame.Surface): Superficie donde se dibuja el menú.
+        imagen_fondo (pygame.Surface): Imagen de fondo del menú principal.
+        dificultad_actual (int): Índice de la dificultad actual del juego.
+
+    Retorna:
         None
     """
     ventana.blit(imagen_fondo, (0, 0))
@@ -141,7 +143,7 @@ def mostrar_pantalla_juego(dificultad_actual: int, estado_juego: dict, banderas_
         estado_juego (dict): Diccionario con el estado del juego que contiene:
             - 'timer_activo' (bool): Si el cronometro esta funcionando
             - 'tiempo_transcurrido' (int): Tiempo transcurrido en segundos
-            - 'tiempo_inicio' (int): Timestamp del inicio del juego
+            - 'tiempo_inicio' (int): Momento del inicio del juego
             - 'minas_totales' (int): Numero total de minas en el tablero
             - 'matriz_numeros' (list): Matriz con los numeros del buscaminas
             - 'matriz_estado' (list): Matriz con el estado de cada casilla
@@ -151,7 +153,7 @@ def mostrar_pantalla_juego(dificultad_actual: int, estado_juego: dict, banderas_
         imagen_bomba (pygame.Surface): Imagen que representa una bomba.
         imagen_bandera (pygame.Surface): Imagen que representa una bandera.
         mostrar_todas_bombas (bool): Si se deben mostrar todas las bombas (fin del juego).
-        indice_hover_actual (int): Indice del botón actualmente resaltado.
+        indice_hover_actual (int): Indice del boton actualmente resaltado.
         ventana_juego (pygame.Surface): La ventana/superficie donde se dibuja el juego.
     
     Devuelve:
@@ -908,6 +910,7 @@ def guardar_puntaje(nombre: str, puntaje: int, tiempo: int) -> None:
             archivo.write(f"{nombre},{puntaje},{tiempo}\n")
 
 
+
 def leer_puntajes() -> list[tuple[str, int, int]]:
     """
     Lee los puntajes desde el archivo CSV.
@@ -915,20 +918,20 @@ def leer_puntajes() -> list[tuple[str, int, int]]:
     Devuelve:
         List[Tuple[str, int, int]]: Lista de tuplas con (nombre, puntaje, tiempo).
                                    Retorna lista vacia si el archivo no existe.
-                                   
     """
-    if not os.path.exists(ARCHIVO_PUNTAJES):
-        return []
-    with open(ARCHIVO_PUNTAJES, 'r') as archivo:
-        lineas = archivo.readlines()
-        puntajes = []
-        for linea in lineas[1:]:  
-            partes = linea.strip().split(',')
-            if len(partes) == 3 and partes[1].isdigit() and partes[2].isdigit():
-                nombre, puntaje, tiempo = partes
-                puntajes.append((nombre, int(puntaje), int(tiempo)))
-     
-        return puntajes
+    puntajes = [] 
+
+    if os.path.exists(ARCHIVO_PUNTAJES):
+        with open(ARCHIVO_PUNTAJES, 'r') as archivo:
+            lineas = archivo.readlines()
+            for linea in lineas[1:]:  
+                partes = linea.strip().split(',')
+                if len(partes) == 3 and partes[1].isdigit() and partes[2].isdigit():
+                    nombre, puntaje, tiempo = partes
+                    puntajes.append((nombre, int(puntaje), int(tiempo)))
+
+    return puntajes  
+
 
 
 def mostrar_lista_puntajes(ventana: pygame.Surface, fuente: pygame.font.Font) -> None:
@@ -1052,7 +1055,7 @@ def reproducir_sonido(sonidos: dict[str, pygame.mixer.Sound], tipo: str) -> None
     Reproduce un sonido especifico si existe en el diccionario.
     
     Recibe:
-        sonidos (Dict[str, pygame.mixer.Sound]): Diccionario con los sonidos cargados.
+        sonidos (dict[str, pygame.mixer.Sound]): Diccionario con los sonidos cargados.
         tipo (str): Tipo de sonido a reproducir ("click", "victoria", "derrota").
         
     Devuelve:
@@ -1073,11 +1076,6 @@ def cambiar_musica_de_fondo(archivo_mp3: str = 'Musica/Musica.mp3') -> None:
                                    
     Devuelve:
         None
-        
-    Note:
-        - Detiene la musica actual
-        - Carga y reproduce la nueva musica en bucle infinito
-
     """
     pygame.mixer.music.stop()
     pygame.mixer.music.load(archivo_mp3)
