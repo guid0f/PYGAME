@@ -105,9 +105,11 @@ while juego_ejecutandose:
                                 
                                 if estado_juego['matriz_numeros'][fila][col] == 'X':
                                     estado_juego['matriz_minas'], estado_juego['matriz_numeros'] = mover_bomba(estado_juego['matriz_minas'], fila, col)
+                                   
                                     for i in range(len(estado_juego['matriz_estado'])):
                                         for j in range(len(estado_juego['matriz_estado'][0])):
                                             estado_juego['matriz_estado'][i][j] = False
+                                
                                     for i in range(len(estado_juego['matriz_banderas'])):
                                         for j in range(len(estado_juego['matriz_banderas'][0])):
                                             estado_juego['matriz_banderas'][i][j] = False
