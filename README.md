@@ -18,15 +18,6 @@ Incluye una interfaz visual completa, niveles de dificultad, sistema de puntajes
 
 ---
 
-## 📸 Capturas
-
-<p align="center">
-  <img src="Imagenes/menu_principal.png" width="450" alt="Menu Principal"/>
-  <img src="Imagenes/juego.png" width="450" alt="Juego en progreso"/>
-</p>
-
----
-
 ## 🛠️ Tecnologías utilizadas
 
 - `Python 3.x`
