@@ -22,7 +22,7 @@ Incluye una interfaz visual completa, niveles de dificultad, sistema de puntajes
 
 - `Python 3.x`
 - `Pygame`
-- Archivos de configuración y datos (`.txt` para puntajes)
+- Archivos de configuración y datos (`.csv` para puntajes)
 - Recursos visuales personalizados (imágenes y sonidos)
 
 ---
